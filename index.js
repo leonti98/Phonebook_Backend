@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const phonebook = [
+let phonebook = [
   {
     id: '1',
     name: 'Arto Hellas',
@@ -26,18 +26,18 @@ const phonebook = [
 
 app.use(express.json());
 
+const generateId = () => {
+  const id = Math.floor(Math.random() * 1000000);
+  return id;
+};
+
 app.get('/api/persons', (request, response) => {
   response.json(phonebook);
 });
 
 app.get('/api/persons/:id', (request, response) => {
   const id = String(request.params.id);
-  console.log('==================================');
-  console.log('id', id);
-  console.log('==================================');
   const person = phonebook.find((person) => person.id === id);
-  console.log('person', person);
-  console.log('==================================');
   if (person) {
     console.log('found');
     response.json(person);
@@ -53,6 +53,40 @@ app.get('/info', (request, response) => {
   response.send(
     `<p>Phonebook has info for ${phonebookLength} people</p><br><p>${date}</p>`
   );
+});
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = String(request.params.id);
+  phonebook = phonebook.filter((p) => p.id !== id);
+  response.status(204).end();
+});
+
+app.post('/api/persons', (request, response) => {
+  const body = request.body;
+
+  if (!body.name || !body.number) {
+    return response.status(400).json({
+      error: 'content missing',
+    });
+  }
+
+  duplicate = phonebook.find((preson) => body.name === preson.name);
+
+  if (duplicate) {
+    return response.status(400).json({
+      error: 'adding duplicate person',
+    });
+  }
+
+  const note = {
+    id: generateId(),
+    name: body.name,
+    number: body.number,
+  };
+
+  phonebook = phonebook.concat(note);
+
+  response.json(note);
 });
 
 const PORT = 3001;
