@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const data = [
+const phonebook = [
   {
     id: '1',
     name: 'Arto Hellas',
@@ -27,11 +27,28 @@ const data = [
 app.use(express.json());
 
 app.get('/api/persons', (request, response) => {
-  response.json(data);
+  response.json(phonebook);
+});
+
+app.get('/api/persons/:id', (request, response) => {
+  const id = String(request.params.id);
+  console.log('==================================');
+  console.log('id', id);
+  console.log('==================================');
+  const person = phonebook.find((person) => person.id === id);
+  console.log('person', person);
+  console.log('==================================');
+  if (person) {
+    console.log('found');
+    response.json(person);
+  } else {
+    console.log('not found');
+    response.status(404).end();
+  }
 });
 
 app.get('/info', (request, response) => {
-  const phonebookLength = data.length;
+  const phonebookLength = phonebook.length;
   const date = new Date();
   response.send(
     `<p>Phonebook has info for ${phonebookLength} people</p><br><p>${date}</p>`
